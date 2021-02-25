@@ -15,17 +15,17 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         Token.objects.create(user=instance)
 
 class User(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(unique=True, max_length=50)
+    username = models.CharField(max_length=50)
     name = models.CharField(max_length=10)
-    email = models.CharField(max_length=50)
+    email = models.CharField(max_length=50, unique=True)
     password = models.CharField(max_length=1000)
     profile_img = models.ImageField(null=True, blank=True)
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     id = models.AutoField(primary_key=True)
     followers = models.ManyToManyField('self', blank=True, symmetrical=False)
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'password', 'is_staff', 'name']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'password', 'is_staff', 'name']
 
     def __unicode__(self):
         return self.username

@@ -74,6 +74,13 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(user)
         return Response(serializer.data['followers'])
 
+    @action(detail=False, list=True, methods=['GET'])
+    def getothers(self, request):    
+        user = request.user
+        users = User.objects.exclude(followers__in=[user])
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
     @action(detail=False, list=True, methods=['POST'])
     def getfollowersdetail(self, request):
         user = User.objects.get(username=request.data['username'])

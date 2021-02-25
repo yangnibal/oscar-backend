@@ -15,7 +15,8 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -25,14 +26,14 @@ SECRET_KEY = '4!li7t6f+a!l1)qf59dc2x(a$jibw3tu)z6@@2y$0ojq&&&i!c'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost', '15.165.237.185']
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'channels',
-    'chat'
+    'chat',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -76,7 +77,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'oscar.wsgi.application'
-ASGI_APPLICATION = 'wonjun.routing.application'
+ASGI_APPLICATION = 'oscar.routing.application'
 CHANNEL_LAYERS = {
     'default': {
         "CONFIG": {

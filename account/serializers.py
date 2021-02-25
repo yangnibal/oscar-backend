@@ -4,8 +4,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import authenticate
 from django_filters.rest_framework import DjangoFilterBackend
 
+class FollowerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'name', 'profile_img']
+
 class UserSerializer(serializers.ModelSerializer):
-    followers = serializers.StringRelatedField(many=True, read_only=True)
+    followers = FollowerSerializer(many=True, read_only=True)
     password = serializers.CharField(write_only=True)
     class Meta:
         model = User
@@ -28,15 +33,15 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 class AuthTokenSerializer(serializers.Serializer):
-    username = serializers.CharField(label=_("Username"))
+    email = serializers.CharField(label=_("Email"))
     password = serializers.CharField(label=_("Password"), style={'input_type': 'password'})
 
     def validate(self, attrs):
-        username = attrs.get('username')
+        email = attrs.get('email')
         password = attrs.get('password')
 
-        if username and password:
-            user = authenticate(username=username, password=password)
+        if email and password:
+            user = authenticate(username=email, password=password)
 
             if user:
                 if not user.is_active:

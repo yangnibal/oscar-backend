@@ -11,25 +11,6 @@ class GetUserMixin:
             return None
         return request.user
 
-class ParticipantsField(serializers.StringRelatedField):
-    def to_internal_value(self, value):
-        return User.objects.get(username=value)
-
-class RoomSerializer(GetUserMixin, serializers.ModelSerializer):
-    participants = ParticipantsField(many=True)
-    class Meta:
-        model = Room
-        fields = ['id', 'title', 'participants', 'description']
-
-    def validate_participants(self, value):
-        user = self.get_user_from_request()
-        if not user:
-            return value
-
-        if user not in value:
-            raise serializers.ValidationError('User must be in participants.')
-        return value
-
 class MessageSerializer(GetUserMixin, serializers.ModelSerializer):
     sender = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all(), write_only=True)
@@ -59,3 +40,41 @@ class MessageSerializer(GetUserMixin, serializers.ModelSerializer):
         if int(url_room_pk) != value.id:
             raise serializers.ValidationError('Room must be same with room of url.')
         return value
+
+class ParticipantsField(serializers.StringRelatedField):
+    def to_internal_value(self, value):
+        user = User.objects.get(username=value)
+        serializer = UserSerializer(user)
+        if serializer.is_valid():
+            return serializer.data
+        return
+
+class ParticipantsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'profile_img']
+
+    def to_internal_value(self, value):
+        user = User.objects.get(id=value)
+        serializer = UserSerializer(user)
+        if serializer.is_valid():
+            return serializer.data
+        return
+
+class RoomSerializer(GetUserMixin, serializers.ModelSerializer):
+    participants = ParticipantsSerializer(many=True)
+    last_message = MessageSerializer(read_only=True)
+
+    class Meta:
+        model = Room
+        fields = ['id', 'title', 'participants', 'description', 'last_message']
+
+    def validate_participants(self, value):
+        user = self.get_user_from_request()
+        if not user:
+            return value
+
+        if user not in value:
+            raise serializers.ValidationError('User must be in participants.')
+        return value
+
