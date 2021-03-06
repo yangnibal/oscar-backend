@@ -5,7 +5,7 @@ from django.conf.urls import url
 from chat.consumers import ChatConsumer
 
 ws_urlpatterns = [
-    re_path(r'^ws/(?P<room_id>\w+)/$', ChatConsumer),
+    re_path(r'^ws/(?P<room_id>\w+)/$', ChatConsumer.as_asgi()),
 ]
 
 application = ProtocolTypeRouter({

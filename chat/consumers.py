@@ -51,7 +51,6 @@ class ChatConsumer(WebsocketConsumer):
         }
 
     def connect(self):
-        import pdb;pdb.set_trace()
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.room_group_name = 'chat_%s' % self.room_id
         async_to_sync(self.channel_layer.group_add)(

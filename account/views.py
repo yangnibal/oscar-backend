@@ -7,12 +7,20 @@ from rest_framework.decorators import (action, api_view)
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
+
+class UserFilter(filters.FilterSet):
+    username = filters.CharFilter(lookup_expr='icontains')
+    name = filters.CharFilter(lookup_expr='icontains')
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'name']
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['username', 'name']
+    filter_class = UserFilter
 
     def token_request(request):
         if user_requested_token() and token_request_is_warranted():
@@ -71,13 +79,14 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, list=True, methods=['GET'])
     def getfollowers(self, request):
         user = request.user
-        serializer = UserSerializer(user)
-        return Response(serializer.data['followers'])
+        users = User.objects.filter(followers__in=[user]).filter(followers__name__icontains=request.GET['keyword']).filter(followers__username__icontains=request.GET['keyword'])
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
 
     @action(detail=False, list=True, methods=['GET'])
     def getothers(self, request):    
         user = request.user
-        users = User.objects.exclude(followers__in=[user])
+        users = User.objects.exclude(followers__in=[user]).filter(followers__name__icontains=request.GET['keyword']).filter(followers__username__icontains=request.GET['keyword'])
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
